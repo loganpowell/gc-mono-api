@@ -1,0 +1,26 @@
+name: on-branch-pushed
+on:
+  push:
+    branches:
+      - '**'
+      - '!master'
+      - '!main'
+
+permissions:
+  contents: write
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+    - name: '☁️ checkout repository'
+      uses: actions/checkout@v3
+    - run: yarn install
+    - run: yarn lint
+  test:
+    runs-on: ubuntu-latest
+    steps:
+    - name: '☁️ checkout repository'
+      uses: actions/checkout@v3
+    - run: yarn install
+    - run: yarn test

@@ -1,9 +1,15 @@
 {
-  "extends": "@repo/typescript-config/base.json",
+  "extends": "@repo/typescript-config/vite.json",
   "compilerOptions": {
-    "lib": ["ES2015"],
-    "outDir": "./dist"
+    "baseUrl": ".",
+    // for local aliased components (conflicts with turbo aliases)
+    "paths": {
+      "@*": ["./src/*"],
+      "@ui/*": ["../../packages/ui/src/*"],
+      "@repo/*": ["../../packages/*"]
+    }
   },
-  "exclude": ["node_modules"],
-  "include": ["."]
+  "types": ["@cloudflare/workers-types/2023-07-01"],
+  "jsxImportSource": "hono/jsx",
+  "include": ["**/*.ts", "**/*.jsx", "**/*.tsx", "**/*.js"]
 }

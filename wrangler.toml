@@ -1,0 +1,41 @@
+name = "api"
+compatibility_date = "2023-12-01"
+
+[dev]
+port = 8080
+
+[placement]
+mode = "smart"
+
+# [vars]
+# MY_VARIABLE = "production_value"
+
+# [[kv_namespaces]]
+# binding = "MY_KV_NAMESPACE"
+# id = "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+
+[env.staging]
+name = "api"
+d1_databases = [
+  { binding = "DB", database_name = "gaza-care-staging", database_id = "fd67f652-fe9c-4465-8eeb-8c1e6c70ab94" }
+]
+
+r2_buckets = [
+  { binding = "R2", bucket_name = "gaza-care" }
+]
+
+[env.staging.vars]
+ALLOWED_ORIGINS = "http://localhost:8787, http://localhost:8788, http://localhost:8789, http://localhost:8080, http://localhost:8090"
+
+[env.production]
+name = "api"
+d1_databases = [
+  { binding = "DB", database_name = "gaza-care-production", database_id = "9a5db72f-50cf-4b31-886e-f5064610194c"}
+]
+
+r2_buckets = [
+  { binding = "R2", bucket_name = "gaza-care" }
+]
+
+[env.production.vars]
+ALLOWED_ORIGINS = "https://medic.gaza-care.com, https://admin.gaza-care.com, https://app.gaza-care.com"

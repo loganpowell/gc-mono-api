@@ -1,0 +1,41 @@
+{
+  "version": "5",
+  "dialect": "sqlite",
+  "entries": [
+    {
+      "idx": 0,
+      "version": "5",
+      "when": 1709253886726,
+      "tag": "0000_cultured_namorita",
+      "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "5",
+      "when": 1709390975006,
+      "tag": "0001_shocking_komodo",
+      "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "5",
+      "when": 1709392545517,
+      "tag": "0002_black_spacker_dave",
+      "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "5",
+      "when": 1709874722375,
+      "tag": "0003_old_boomer",
+      "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "5",
+      "when": 1710655947267,
+      "tag": "0004_brainy_kulan_gath",
+      "breakpoints": true
+    },
+  ]
+}
