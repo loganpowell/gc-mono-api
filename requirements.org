@@ -1,0 +1,167 @@
+* First Aid For Gaza
+
+** Purpose
+
+To save lives by giving anyone with a phone information they need to perform first aid on those who are injured.
+
+** Format
+
+Medics can submit initial content as videos, or documents or images. Initially just
+support videos.
+
+** Requirements
+
+*** User side (gaza-care.com)
+
+
+- Serve short video content -> Need storage like s3 (cloudflare R2)
+
+- user needs to be able to search through the videos
+  - we need to do locale detection
+
+  - look at youtube for design reference
+
+  - language detection
+
+  - needs to be in arabic
+
+*** Admin side (admin.gaza-care.com)
+
+- have a UI to be able to approve videos
+
+
+*** Content Creator UI (medic.gaza-care.com)
+
+- have a UI to be able to upload videos
+
+- prevent duplicate video uploads
+
+- log views of content
+
+- log search terms
+
+- log location
+
+- see video / content status
+
+- add some more fields.
+  - qualifications, contact information ()
+  - give us permission to contact you
+  - ethical aspect
+
+- allow admin to enter translations for uploaded forms
+
+
+- allow yasi to be logged in as admin and medic
+
+*** Schema
+
+**** Translations
+
+| id | translatable_id | translatable_type | translatable_field | language | text |
+|    |                 |                   |                    |          |      |
+
+**** Tutorials
+
+A particular piece of instructional content, including any metadata needed to support searchability. For now, the only
+allowed language code is arabic (ar). In order to be approved, a tutorial object must have a video_id
+
+| id | language | uploader_id | title | description | keywords | video_id | content_text | metadata | status                      | created_at | updated_at |
+|    | ar       |             |       |             |          |          |              |          | pending_approval / approved |            |            |
+
+GET /tutorials?q={keywords}
+GET /tutorials/{tutorial_id}
+POST /tutorials
+PUT /tutorials
+
+# TODO consider search options before choosing a database?
+# https://medium.com/dev-channel/how-to-add-full-text-search-to-your-website-4e9c80ce2bf4
+# https://stackoverflow.com/questions/58651852/use-postgresql-full-text-search-to-fuzzy-match-all-search-terms
+# https://viblo.asia/p/implementing-multilingual-full-text-search-with-fuzziness-and-highlighting-3P0lPMnp5ox
+
+select * from tutorials t
+  left join taggable vt
+    on vt.taggable_id = t.id and vt.taggable_tyoe = 'tutorial'
+  left join videos t
+    on t.video_id = v.id
+  inner join tags t
+    on vt.tag_id = t.id
+  where t.status = 'approved' and
+    (description like '%?%' or t.name in (?)), keywords
+
+**** Videos
+
+Expect to support multiple file artifacts per video (for instance to store in various resolutions).
+
+| id | uploader_user_id | title | filename | md5_hash | resolution | length_seconds | status                      | created_at | updated_at |
+|    |                  |       |          |          |            |                | pending_approval / approved |            |            |
+
+GET /videos/{video_id}
+TODO what's the sequence of events for this and
+POST /video
+
+**** views
+| id | viewable_id | viewer_ip | geolocation_data | created_at | updated_at |
+|    |             |           |                  |            |            |
+
+**** searches
+
+| id | search_text | result_count | searcher_ip | created_at | updated_at |
+|    |             |              |             |            |            |
+
+**** signins
+
+| id | user_id | timestamp | is_admin | token_id | signin_ip |
+|    |         |           |          |          |           |
+
+**** ip_geolocation
+
+| id | ip | geolocation | created_at | updated_at |
+|    |    |             |            |            |
+
+**** tags
+
+| id | name | colour | created_at | updated_at |
+|    |      |        |            |            |
+
+**** taggable
+
+| tag_id | taggable_id | taggable_type | created_at | updated_at |
+|        |             |               |            |            |
+
+*** Security
+
+**** Overview
+
+* Users sign in via Google only, for now, and are issued a signed JWT
+* The search endpoint as well as endpoints to fetch individual tutorials or videos
+    are available to any caller regardless of whether they have a token.
+* Other endpoints require a valid signed JWT, and the user-management endpoints
+    in particular require one with the admin claim, as do any actions that involve
+    approving/publishing content, or editing content that's already been approved/
+    published.
+
+**** OAuth endpoints
+
+GET /signin/google/callback?code={code}
+
+A standard OAuth callback endpoint that:
+1. Makes a request to Google exchanging the code for an ID token
+2. Extracts a google-verified email address from the token
+3. If the email address appears in the users table, we issue a signed JWT,
+  expiring in one hour, with the standard claims plus:
+  a. `sub` claim contains the user's user ID
+  b. `adm` claim contains true or false, according to the is_admin field on the users table row
+
+**** users
+
+| id | email | is_admin | created_at | updated_at |
+|    |       |          |            |            |
+
+POST /users
+PUT /users/{user_id}
+GET /users/{user_id}
+GET /users
+
+In addition to requiring a valid signed JWT, like all other endpoints, all of these
+endpoints require the caller to have the `adm` (admin) claim.
